@@ -93,5 +93,5 @@ function ShowSolution() {
         .style("fill", randomColors[i]);
     });
   });
-  d3.select("#h1").text(`Die Anzahl der Farben: ${mainSet.length}`);
+  d3.select("#h1").text(`Number of Colors: ${mainSet.length}`);
 }

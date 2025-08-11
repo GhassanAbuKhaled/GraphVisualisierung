@@ -1,5 +1,5 @@
 const graphProperty = {
-  numberOfnodes: 10,
+  numberOfnodes: 20,
   edgesDensity: 0.6,
   nodes: [],
   links: [],
@@ -26,7 +26,7 @@ getRandomGraph();
 
 function getRandomGraph() {
   if (graphProperty.numberOfnodes >= 101) {
-    d3.select("#h1").text(`Die Anzahl der Knoten ist so groß`);
+    d3.select("#h1").text(`Number of nodes is too large`);
     return;
   }
   removeOldGraphAndInitializeNew();
@@ -40,7 +40,7 @@ function getRandomGraph() {
 }
 
 function removeOldGraphAndInitializeNew() {
-  d3.select("#h1").text("Graph Visualisierung");
+  d3.select("#h1").text("Graph Visualization");
   d3.select("#graph").selectAll("*").remove();
   svg = d3.select("#graph").append("svg").attr("class", "svg");
   simulation = d3.forceSimulation();
