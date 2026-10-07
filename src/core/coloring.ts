@@ -1,5 +1,6 @@
 import type { Neighborhoods } from './distance'
 import type { Graph } from './graph'
+import { createRng, type Rng } from './rng'
 
 export interface Step {
   vertex: number
@@ -71,4 +72,39 @@ export function greedyColoring(
   return trace
     ? { colorOf, classes, numColors: classes.length, trace }
     : { colorOf, classes, numColors: classes.length }
+}
+
+/**
+ * Vertex order for the next round, as randomShuffleSets in set.c: shuffle the classes
+ * (Fisher–Yates), list their members class by class, then the uncolored vertices.
+ */
+export function improvementOrder(g: Graph, previous: ColoringResult, rng: Rng): Int32Array {
+  const classes = previous.classes.slice()
+  for (let i = classes.length - 1; i > 0; i--) {
+    const j = rng.int(i + 1)
+    ;[classes[i], classes[j]] = [classes[j], classes[i]]
+  }
+  const order = new Int32Array(g.n)
+  let k = 0
+  for (const members of classes) for (const v of members) order[k++] = v
+  for (let v = 0; v < g.n; v++) if (!g.colorable[v]) order[k++] = v
+  return order
+}
+
+/** Runs improvement rounds; round r uses createRng(seed + r). Colors never increase. */
+export function improve(
+  g: Graph,
+  nb: Neighborhoods,
+  previous: ColoringResult,
+  rounds: number,
+  seed: number,
+  firstRound = 1,
+): ColoringResult[] {
+  const results: ColoringResult[] = []
+  let current = previous
+  for (let r = firstRound; r < firstRound + rounds; r++) {
+    current = greedyColoring(g, nb, improvementOrder(g, current, createRng(seed + r)))
+    results.push(current)
+  }
+  return results
 }
