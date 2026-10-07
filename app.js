@@ -90,7 +90,17 @@ function updateSimulation() {
     });
   simulation.alpha(1).restart();
 }
+// Space kept free between the nodes and the border of the drawing area,
+// large enough for the node labels on the right
+const BORDER_PADDING = 30;
+
 function ticked() {
+  // Keep every node inside the drawing area, also on narrow screens
+  graphProperty.nodes.forEach((d) => {
+    d.x = Math.max(BORDER_PADDING, Math.min(width - BORDER_PADDING, d.x));
+    d.y = Math.max(BORDER_PADDING, Math.min(height - BORDER_PADDING, d.y));
+  });
+
   node
     .attr("cx", function (d) {
       return d.x;
