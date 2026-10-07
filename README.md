@@ -5,9 +5,9 @@ vertices that are at most `d` edges apart always receive different colors. It is
 the visual counterpart of the C implementation in the companion project
 *Abschlussprojekt*, and reproduces its results exactly (see [Tests](#tests)).
 
-> **Status:** this branch (`redesign`) is a rebuild of the original plain-JS page
-> (still on `main` and live on GitHub Pages) with React, TypeScript and WebGL.
-> Phases 1–2 of 6 are done, see [Roadmap](#roadmap).
+> **Status:** a rebuild of the original plain-JS page with React, TypeScript and
+> WebGL. Phases 1–2 of 6 are done, see [Roadmap](#roadmap). The old page is in the
+> git history (last commit before the rebuild: `1fefd9a`).
 
 ## Features
 
@@ -74,19 +74,23 @@ The full design is in
 | 2. Basic app | Worker engine, store, Sigma canvas, controls, datasets, color + improve, EN/DE, themes, deploy workflow | ✅ Done |
 | 3. Teaching features | Hover a vertex to highlight its distance-d neighborhood, color class panel (click to highlight), rounds chart | ⏳ Open |
 | 4. Step player | Play / pause / step through the coloring, one explanatory sentence per step (graphs up to 300 nodes) | ⏳ Open |
-| 5. Phone and release | Bottom drawer layout on phones, more browser tests, final README, merge into `main` | ⏳ Open |
+| 5. Phone and polish | Bottom drawer layout on phones, more browser tests, final README | ⏳ Open |
 | 6. WebAssembly | Run the C code of *Abschlussprojekt* in the browser behind the same `ColoringEngine` interface and compare results | ⏳ Later |
 
 Each phase gets its own implementation plan in `docs/superpowers/plans/`
 before work starts.
 
-### Before merging into `main`
+### Deployment
 
-1. Finish phase 5.
-2. In the repository settings, change **Settings → Pages → Source** from
-   *Deploy from a branch* to **GitHub Actions**. The workflow in
-   `.github/workflows/deploy.yml` then builds and deploys on every push to
-   `main`. Until then, `main` keeps serving the old plain-JS page.
+The page must be built before it can be served, so GitHub Pages has to deploy
+through the workflow in `.github/workflows/deploy.yml`, not from the branch:
+
+1. In the repository settings, set **Settings → Pages → Source** to
+   **GitHub Actions** (it was *Deploy from a branch* for the old page).
+2. Push `main`. The workflow runs the tests, builds and deploys.
+
+Pushing `main` while the source is still *Deploy from a branch* would publish
+the unbuilt `index.html` and break the live page.
 
 ### Known issues to address later
 
