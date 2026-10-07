@@ -160,7 +160,7 @@ rounds chart move into a bottom drawer with three tabs. No horizontal scrolling 
   Uncolored vertices (no edges) are gray.
 - Labels are hidden automatically above 200 vertices (toggle still available).
 - `color-scheme` matches the active theme so native controls stay visible (Safari).
-- Font: Inter.
+- Font: Geist (ships with the shadcn/ui `nova` preset).
 
 ### 4.5 i18n
 
@@ -257,10 +257,10 @@ no console errors; no vertex outside the canvas; no horizontal scroll at 320 px.
 Each phase ends with a working, deployable page.
 
 1. **Foundation:** Vite + React + TS + Tailwind + shadcn/ui setup, `core/` with all unit
-   and parity tests passing.
+   and parity tests passing. The old plain-JS files are removed from the branch (they
+   remain on `main` and in git history), since the Vite `index.html` replaces them.
 2. **Basic app:** engine worker, store, Sigma canvas with ForceAtlas2, left panel,
    datasets, color + improve, status badge, i18n, themes, GitHub Pages workflow.
-   The old plain-JS files are removed from the branch (they remain in git history).
 3. **Teaching features:** hover neighborhood, color class panel, rounds chart.
 4. **Step player.**
 5. **Phone layout, E2E tests, README.**
