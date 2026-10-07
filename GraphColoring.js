@@ -1,10 +1,8 @@
-let randomColors;
 let mainSet;
 let orderOfVertices;
 
 function startColoring() {
   orderOfVertices = [];
-  randomColors = [];
   if (graphProperty.tryAgain) {
     mainSet = [new Set()];
   }
@@ -71,27 +69,22 @@ function greedyColoring() {
   ShowSolution();
 }
 
-function getRandomColor() {
-  for (let i = 0; i <= mainSet.length; i++) {
-    let r = Math.floor(Math.random() * 256);
-    let g = Math.floor(Math.random() * 256);
-    let b = Math.floor(Math.random() * 256);
-    let c = "rgb(" + r + "," + g + "," + b + ")";
-    if (!randomColors.includes(c) && r + g + b != 0) {
-      randomColors[i] = c;
-    }
-  }
+// One distinct color per set: a fixed palette for up to 10 sets,
+// otherwise hues spread evenly around the color wheel
+function getColor(i, count) {
+  return count <= d3.schemeTableau10.length
+    ? d3.schemeTableau10[i]
+    : d3.interpolateSinebow(i / count);
 }
 
 function ShowSolution() {
-  getRandomColor();
   mainSet.forEach((set, i) => {
-    set.forEach((value, j) => {
+    set.forEach((value) => {
       d3.select(`circle:nth-of-type(${value + 1})`)
         .transition()
         .duration(100)
-        .style("fill", randomColors[i]);
+        .style("fill", getColor(i, mainSet.length));
     });
   });
-  d3.select("#h1").text(`Number of Colors: ${mainSet.length}`);
+  d3.select("#status").text(`Number of Colors: ${mainSet.length}`);
 }

@@ -22,13 +22,23 @@ const graphProperty = {
 let svg;
 let simulation;
 
+const MAX_NODES = 100;
+
 getRandomGraph();
 
-function getRandomGraph() {
-  if (graphProperty.numberOfnodes >= 101) {
-    d3.select("#h1").text(`Number of nodes is too large`);
+// Validate the input before storing it, so numberOfnodes always matches the current graph
+function setNumberOfNodes(input) {
+  const n = Number(input.value);
+  if (!Number.isInteger(n) || n < 1 || n > MAX_NODES) {
+    d3.select("#status").text(`Number of nodes must be between 1 and ${MAX_NODES}`);
+    input.value = graphProperty.numberOfnodes;
     return;
   }
+  graphProperty.numberOfnodes = n;
+  getRandomGraph();
+}
+
+function getRandomGraph() {
   removeOldGraphAndInitializeNew();
   graphProperty.coloringDistances = 1;
   d3.select("#distance-d").property("value", 1);
@@ -40,7 +50,7 @@ function getRandomGraph() {
 }
 
 function removeOldGraphAndInitializeNew() {
-  d3.select("#h1").text("Graph Visualization");
+  d3.select("#status").text("");
   d3.select("#graph").selectAll("*").remove();
   svg = d3.select("#graph").append("svg").attr("class", "svg");
   simulation = d3.forceSimulation();
