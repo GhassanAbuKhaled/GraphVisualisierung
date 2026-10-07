@@ -100,6 +100,8 @@ export function improve(
   seed: number,
   firstRound = 1,
 ): ColoringResult[] {
+  if (!Number.isSafeInteger(seed)) throw new RangeError(`seed must be an integer, got ${seed}`)
+  if (!Number.isInteger(rounds) || rounds < 0) throw new RangeError(`invalid number of rounds ${rounds}`)
   const results: ColoringResult[] = []
   let current = previous
   for (let r = firstRound; r < firstRound + rounds; r++) {

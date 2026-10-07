@@ -61,6 +61,18 @@ describe('distanceNeighborhoods', () => {
     expect(distanceNeighborhoods(g, 2, { limit: 380 }).neighbors.length).toBe(380)
   })
 
+  it('builds dense graphs quickly (stops each BFS once its component is complete)', () => {
+    const n = 1000
+    const complete: number[] = []
+    for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) complete.push(i, j)
+    const g = buildGraph(n, complete)
+    const start = performance.now()
+    const nb = distanceNeighborhoods(g, 3)
+    const elapsed = performance.now() - start
+    expect(nb.neighbors.length).toBe(n * (n - 1))
+    expect(elapsed).toBeLessThan(1000)
+  })
+
   it('rejects d < 1', () => {
     expect(() => distanceNeighborhoods(buildGraph(2, [0, 1]), 0)).toThrow(RangeError)
   })

@@ -54,6 +54,13 @@ describe('improve', () => {
     expect(lastTwo.map((r) => [...r.colorOf])).toEqual(all.slice(2).map((r) => [...r.colorOf]))
   })
 
+  it('rejects seeds that are not integers', () => {
+    const { g, nb, first } = setup(10, randomPairs(10, 0.3, 1), 1)
+    expect(() => improve(g, nb, first, 1, Number.NaN)).toThrow(RangeError)
+    expect(() => improve(g, nb, first, 1, 1.5)).toThrow(RangeError)
+    expect(() => improve(g, nb, first, -1, 1)).toThrow(RangeError)
+  })
+
   it('returns an empty list for 0 rounds', () => {
     const { g, nb, first } = setup(3, [0, 1], 1)
     expect(improve(g, nb, first, 0, 1)).toEqual([])

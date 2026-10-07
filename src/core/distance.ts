@@ -24,6 +24,36 @@ export interface DistanceOptions {
   onProgress?: (fraction: number) => void
 }
 
+/** Size of the connected component of every vertex. */
+function componentSizes(g: Graph): Int32Array {
+  const { n, offsets, neighbors } = g
+  const component = new Int32Array(n).fill(-1)
+  const sizes: number[] = []
+  const queue = new Int32Array(n)
+  for (let s = 0; s < n; s++) {
+    if (component[s] !== -1) continue
+    const id = sizes.length
+    let head = 0
+    let tail = 0
+    queue[tail++] = s
+    component[s] = id
+    while (head < tail) {
+      const x = queue[head++]
+      for (let k = offsets[x]; k < offsets[x + 1]; k++) {
+        const y = neighbors[k]
+        if (component[y] === -1) {
+          component[y] = id
+          queue[tail++] = y
+        }
+      }
+    }
+    sizes.push(tail)
+  }
+  const result = new Int32Array(n)
+  for (let v = 0; v < n; v++) result[v] = sizes[component[v]]
+  return result
+}
+
 /** Depth-limited BFS from every colorable vertex, as calculateDistance__d in bfs.c. */
 export function distanceNeighborhoods(g: Graph, d: number, options: DistanceOptions = {}): Neighborhoods {
   if (!Number.isInteger(d) || d < 1) throw new RangeError(`d must be a positive integer, got ${d}`)
@@ -44,6 +74,7 @@ export function distanceNeighborhoods(g: Graph, d: number, options: DistanceOpti
   const depth = new Int32Array(n)
   const queue = new Int32Array(n)
   const progressStep = Math.max(1, Math.floor(n / 100))
+  const componentSize = componentSizes(g)
 
   for (let s = 0; s < n; s++) {
     offsets[s] = size
@@ -53,7 +84,7 @@ export function distanceNeighborhoods(g: Graph, d: number, options: DistanceOpti
       queue[tail++] = s
       visitedFrom[s] = s
       depth[s] = 0
-      while (head < tail) {
+      while (head < tail && tail < componentSize[s]) {
         const x = queue[head++]
         if (depth[x] === d) continue
         for (let k = adjOffsets[x]; k < adjOffsets[x + 1]; k++) {
