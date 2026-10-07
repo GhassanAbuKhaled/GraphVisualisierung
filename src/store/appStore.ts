@@ -36,6 +36,8 @@ export const MAX_IMPROVE_ROUNDS = 50
 export const DEFAULT_DISPLAY: DisplaySettings = { nodeSize: 4, showLabels: null, edgeOpacity: 0.35 }
 /** Labels are shown automatically up to this many vertices (spec §4.4). */
 export const LABEL_LIMIT = 200
+/** Consecutive worker crashes after which the engine is not restarted again. */
+export const MAX_CRASH_RESTARTS = 3
 
 export interface AppState {
   sourceKind: SourceKind
@@ -94,16 +96,27 @@ export function createAppStore(createEngineHandle: EngineFactory): StoreApi<AppS
     /** What the engine currently holds, to restore it after a restart. */
     let loadedSource: GraphSource | null = null
     let appliedD = 1
+    /** Crashes since the last successful operation; above MAX_CRASH_RESTARTS the engine stays down. */
+    let crashes = 0
+    let engineDown = false
 
     type Current = () => boolean
 
     async function run(task: (engine: ColoringEngine, current: Current) => Promise<void>) {
+      // One operation at a time: a second one would leave the store and the engine out of sync
+      if (get().busy) return
+      if (engineDown) {
+        set({ error: { key: 'errors.crash' } })
+        return
+      }
       const token = ++operation
       const current = () => token === operation
       set({ busy: true, progress: null, error: null })
       try {
         await ready
-        if (current()) await task(handle.engine, current)
+        if (!current()) return
+        await task(handle.engine, current)
+        if (current()) crashes = 0
       } catch (error) {
         if (current()) set({ error: toAppError(error, get().d) })
       } finally {
@@ -137,17 +150,37 @@ export function createAppStore(createEngineHandle: EngineFactory): StoreApi<AppS
       set({ busy: false, progress: null, coloring: null, rounds: [], d: appliedD })
       const engine = handle.engine
       const source = loadedSource
-      const d = appliedD
-      ready = source
-        ? engine.loadGraph(source).then(
-            () => engine.setDistance(d).then(() => undefined),
-            () => undefined,
-          )
-        : Promise.resolve()
+      ready = source ? restore(engine, source, appliedD) : Promise.resolve()
       return ready
     }
 
+    /** Reloads the graph into a fresh engine. Never rejects: if d no longer fits, falls back to d = 1. */
+    async function restore(engine: ColoringEngine, source: GraphSource, d: number): Promise<void> {
+      try {
+        await engine.loadGraph(source)
+        await engine.setDistance(d)
+      } catch {
+        try {
+          await engine.setDistance(1)
+          if (handle.engine === engine) {
+            appliedD = 1
+            set({ d: 1 })
+          }
+        } catch {
+          // Nothing left to restore; the next operation reports its own error
+        }
+      }
+    }
+
     function onCrash() {
+      crashes++
+      if (crashes > MAX_CRASH_RESTARTS) {
+        operation++
+        handle.terminate()
+        engineDown = true
+        set({ busy: false, progress: null, error: { key: 'errors.crash' } })
+        return
+      }
       void restartEngine()
       set({ error: { key: 'errors.crash' } })
     }
@@ -195,7 +228,7 @@ export function createAppStore(createEngineHandle: EngineFactory): StoreApi<AppS
       },
 
       setDistance(d) {
-        if (!isValidD(d)) return Promise.resolve()
+        if (!isValidD(d) || get().busy) return Promise.resolve()
         set({ d })
         if (!get().graph) return Promise.resolve()
         return run((engine, current) => applyDistance(engine, current, d))

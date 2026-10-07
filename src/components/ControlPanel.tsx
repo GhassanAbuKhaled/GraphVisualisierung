@@ -37,7 +37,7 @@ function Field({ id, label, value, children }: { id: string; label: string; valu
 }
 
 /** Number input that only commits valid values; shows the stored value again on blur. */
-function NumberInput({ id, value, min, max, onCommit }: { id: string; value: number; min: number; max: number; onCommit: (value: number) => void }) {
+function NumberInput({ id, value, min, max, disabled, onCommit }: { id: string; value: number; min: number; max: number; disabled?: boolean; onCommit: (value: number) => void }) {
   const [draft, setDraft] = useState<string | null>(null)
   return (
     <Input
@@ -46,6 +46,7 @@ function NumberInput({ id, value, min, max, onCommit }: { id: string; value: num
       inputMode="numeric"
       min={min}
       max={max}
+      disabled={disabled}
       value={draft ?? String(value)}
       onChange={(event) => setDraft(event.target.value)}
       onBlur={() => {
@@ -149,7 +150,7 @@ export function ControlPanel() {
 
       <Section title={t('coloring.heading')}>
         <Field id="distance" label={t('coloring.distance')}>
-          <NumberInput id="distance" value={d} min={1} max={MAX_DISTANCE} onCommit={(value) => void actions.setDistance(value)} />
+          <NumberInput id="distance" value={d} min={1} max={MAX_DISTANCE} disabled={busy} onCommit={(value) => void actions.setDistance(value)} />
         </Field>
         <Button disabled={busy || !graph} onClick={() => void actions.color()}>
           {t('coloring.color')}

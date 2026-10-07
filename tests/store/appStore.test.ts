@@ -2,14 +2,30 @@ import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { createEngine } from '@/engine/engine'
 import type { EngineHandle } from '@/engine/client'
-import type { DatasetId } from '@/engine/types'
+import type { ColoringEngine, DatasetId } from '@/engine/types'
 import { createAppStore, DEFAULT_RANDOM } from '@/store/appStore'
 
 const files: Record<DatasetId, string> = { yeast: 'yeast.txt', minnesota: 'minnesota.txt', DC: 'DC.txt' }
 const loadDataset = async (id: DatasetId) =>
   readFileSync(new URL(`../../public/data/${files[id]}`, import.meta.url), 'utf8')
 
-function setup(options: { limit?: number; loader?: (id: DatasetId) => Promise<string> } = {}) {
+/** Adds a delay to every call, like the real worker, so other actions can interleave. */
+function slow(engine: ColoringEngine): ColoringEngine {
+  const wait = () => new Promise((resolve) => setTimeout(resolve, 5))
+  return {
+    loadGraph: async (source) => (await wait(), engine.loadGraph(source)),
+    setDistance: async (d, onProgress) => (await wait(), engine.setDistance(d, onProgress)),
+    colorFirst: async (options) => (await wait(), engine.colorFirst(options)),
+    improve: async (rounds, seed) => (await wait(), engine.improve(rounds, seed)),
+  }
+}
+
+async function waitFor(condition: () => boolean) {
+  for (let i = 0; i < 200 && !condition(); i++) await new Promise((resolve) => setTimeout(resolve, 1))
+  expect(condition()).toBe(true)
+}
+
+function setup(options: { limit?: number; loader?: (id: DatasetId) => Promise<string>; slow?: boolean } = {}) {
   const handles: { terminated: boolean }[] = []
   let crash: () => void = () => {}
   const factory = (onCrash: () => void): EngineHandle => {
@@ -17,7 +33,9 @@ function setup(options: { limit?: number; loader?: (id: DatasetId) => Promise<st
     const record = { terminated: false }
     handles.push(record)
     return {
-      engine: createEngine({ loadDataset: options.loader ?? loadDataset, limit: options.limit }),
+      engine: (options.slow ? slow : (e: ColoringEngine) => e)(
+        createEngine({ loadDataset: options.loader ?? loadDataset, limit: options.limit }),
+      ),
       terminate: () => {
         record.terminated = true
       },
@@ -136,6 +154,49 @@ describe('appStore', () => {
     const state = store.getState()
     expect(state.error).toMatchObject({ key: 'errors.parse' })
     expect(state.graph?.n).toBe(DEFAULT_RANDOM.n)
+  })
+
+  it('ignores engine actions while another operation is running', async () => {
+    const { store } = setup({ slow: true })
+    await store.getState().generate()
+    store.getState().setRandom({ n: 300 })
+    const generating = store.getState().generate()
+    await store.getState().setDistance(2)
+    await store.getState().color()
+    await generating
+    expect(store.getState().d).toBe(1)
+    expect(store.getState().graph?.n).toBe(300)
+    await store.getState().color()
+    expect(store.getState().coloring?.colorOf.length).toBe(300)
+  })
+
+  it('a cancel whose restore fails falls back to d = 1 and stays usable', async () => {
+    const { store } = setup({ slow: true, limit: 600 })
+    store.getState().setRandom({ n: 20, p: 0.1, seed: 7 })
+    await store.getState().generate()
+    await store.getState().setDistance(4)
+    expect(store.getState().d).toBe(4)
+    store.getState().setRandom({ n: 60 })
+    const generating = store.getState().generate()
+    await waitFor(() => store.getState().graph?.n === 60)
+    await expect(store.getState().cancel()).resolves.toBeUndefined()
+    await generating
+    expect(store.getState().d).toBe(1)
+    await store.getState().color()
+    expect(store.getState().error).toBeNull()
+    expect(store.getState().coloring?.colorOf.length).toBe(60)
+  })
+
+  it('stops restarting a worker that keeps crashing', async () => {
+    const { store, handles, crash } = setup()
+    await store.getState().generate()
+    for (let i = 0; i < 10; i++) crash()
+    expect(handles.length).toBeLessThanOrEqual(4)
+    expect(store.getState().error).toEqual({ key: 'errors.crash' })
+    expect(store.getState().busy).toBe(false)
+    await store.getState().color()
+    expect(store.getState().error).toEqual({ key: 'errors.crash' })
+    expect(store.getState().busy).toBe(false)
   })
 
   it('updates display settings', () => {
