@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { classColor, TABLEAU10, UNCOLORED } from '@/lib/colors'
+import { classColor, mixColors, TABLEAU10, UNCOLORED } from '@/lib/colors'
 
 describe('classColor', () => {
   it('uses the Tableau 10 palette for the first ten classes', () => {
@@ -15,5 +15,14 @@ describe('classColor', () => {
   it('returns gray for uncolored vertices', () => {
     expect(classColor(-1)).toBe(UNCOLORED)
     expect(TABLEAU10).not.toContain(UNCOLORED)
+  })
+})
+
+describe('mixColors', () => {
+  it('blends two hex colors', () => {
+    expect(mixColors('#000000', '#ffffff', 0)).toBe('#000000')
+    expect(mixColors('#000000', '#ffffff', 1)).toBe('#ffffff')
+    expect(mixColors('#000000', '#ffffff', 0.5)).toBe('#808080')
+    expect(mixColors('#ffffff', '#52525b', 0.35)).toBe('#c2c2c6')
   })
 })

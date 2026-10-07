@@ -25,3 +25,11 @@ function hslToHex(h: number, s: number, l: number): string {
   }
   return `#${channel(0)}${channel(8)}${channel(4)}`
 }
+
+/** Opaque blend of two #rrggbb colors: amount 0 = from, 1 = to. */
+export function mixColors(from: string, to: string, amount: number): string {
+  const parse = (hex: string) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16))
+  const a = parse(from)
+  const b = parse(to)
+  return `#${a.map((x, i) => Math.round(x + (b[i] - x) * amount).toString(16).padStart(2, '0')).join('')}`
+}

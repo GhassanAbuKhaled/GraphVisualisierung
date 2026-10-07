@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { BusyOverlay } from '@/components/BusyOverlay'
 import { ControlPanel } from '@/components/ControlPanel'
+import { GraphCanvas } from '@/components/GraphCanvas'
 import { StatusBadge } from '@/components/StatusBadge'
 import { TopBar } from '@/components/TopBar'
 import { appStore, useApp } from '@/store'
@@ -27,7 +28,7 @@ export default function App() {
       <main className="flex min-h-0 flex-1 flex-col md:flex-row">
         <ControlPanel />
         <div className="relative min-h-[60vh] flex-1 md:min-h-0">
-          <div data-testid="graph-canvas" className="absolute inset-0" />
+          <GraphCanvas />
           <StatusBadge />
           <BusyOverlay />
         </div>
