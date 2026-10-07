@@ -128,3 +128,10 @@
     @apply font-sans;
     }
 }
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+}

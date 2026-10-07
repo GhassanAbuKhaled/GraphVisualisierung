@@ -15,5 +15,5 @@
     "skipLibCheck": true,
     "paths": { "@/*": ["./src/*"] }
   },
-  "include": ["tests", "src/core"]
+  "include": ["tests", "e2e", "src/core", "src/debug.ts"]
 }
