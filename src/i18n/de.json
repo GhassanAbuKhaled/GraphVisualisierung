@@ -1,0 +1,51 @@
+{
+  "app": {
+    "title": "Graphfärbung",
+    "subtitle": "Greedy-Färbung mit Distanz d",
+    "github": "GitHub"
+  },
+  "language": { "label": "Sprache" },
+  "theme": { "toggle": "Dunkelmodus umschalten" },
+  "graph": {
+    "heading": "Graph",
+    "random": "Zufällig",
+    "dataset": "Datensatz",
+    "nodes": "Knoten",
+    "density": "Kantendichte",
+    "seed": "Seed",
+    "generate": "Erzeugen",
+    "load": "Laden",
+    "datasetOption": "{{name}} · {{count, number}} Knoten"
+  },
+  "coloring": {
+    "heading": "Färbung",
+    "distance": "Distanz d",
+    "color": "Färben",
+    "improve": "Verbessern ×{{count}}",
+    "rounds": "Runden"
+  },
+  "display": {
+    "heading": "Darstellung",
+    "nodeSize": "Knotengröße",
+    "labels": "Beschriftungen",
+    "edgeOpacity": "Kantendeckkraft",
+    "relayout": "Neu anordnen"
+  },
+  "status": {
+    "nodes_one": "{{count, number}} Knoten",
+    "nodes_other": "{{count, number}} Knoten",
+    "edges_one": "{{count, number}} Kante",
+    "edges_other": "{{count, number}} Kanten",
+    "distance": "d = {{d}}",
+    "colors_one": "{{count, number}} Farbe",
+    "colors_other": "{{count, number}} Farben",
+    "computing": "Berechne …",
+    "cancel": "Abbrechen"
+  },
+  "errors": {
+    "tooLarge": "Distanz {{d}} erzeugt zu viele Nachbarpaare für den Browser. Bitte ein kleineres d wählen.",
+    "parse": "Die Graphdatei konnte nicht gelesen werden: {{message}}",
+    "crash": "Die Berechnung wurde unerwartet beendet. Bitte erneut versuchen.",
+    "generic": "Etwas ist schiefgelaufen: {{message}}"
+  }
+}

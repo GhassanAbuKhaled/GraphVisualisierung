@@ -1,0 +1,51 @@
+{
+  "app": {
+    "title": "Graph Coloring",
+    "subtitle": "Greedy distance-d coloring",
+    "github": "GitHub"
+  },
+  "language": { "label": "Language" },
+  "theme": { "toggle": "Toggle dark mode" },
+  "graph": {
+    "heading": "Graph",
+    "random": "Random",
+    "dataset": "Dataset",
+    "nodes": "Nodes",
+    "density": "Edge density",
+    "seed": "Seed",
+    "generate": "Generate",
+    "load": "Load",
+    "datasetOption": "{{name}} · {{count, number}} nodes"
+  },
+  "coloring": {
+    "heading": "Coloring",
+    "distance": "Distance d",
+    "color": "Color",
+    "improve": "Improve ×{{count}}",
+    "rounds": "Rounds"
+  },
+  "display": {
+    "heading": "Display",
+    "nodeSize": "Node size",
+    "labels": "Show labels",
+    "edgeOpacity": "Edge opacity",
+    "relayout": "Re-layout"
+  },
+  "status": {
+    "nodes_one": "{{count, number}} node",
+    "nodes_other": "{{count, number}} nodes",
+    "edges_one": "{{count, number}} edge",
+    "edges_other": "{{count, number}} edges",
+    "distance": "d = {{d}}",
+    "colors_one": "{{count, number}} color",
+    "colors_other": "{{count, number}} colors",
+    "computing": "Computing…",
+    "cancel": "Cancel"
+  },
+  "errors": {
+    "tooLarge": "Distance {{d}} creates too many neighbor pairs for the browser. Try a smaller d.",
+    "parse": "The graph file could not be read: {{message}}",
+    "crash": "The computation stopped unexpectedly. Please try again.",
+    "generic": "Something went wrong: {{message}}"
+  }
+}
